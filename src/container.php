@@ -22,8 +22,6 @@ use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Factory\UploadedFileFactory;
-use Mochi\Route\RouteCollection;
-use Mochi\Route\RouteBuilder;
 use Slim\Psr7\Factory\UriFactory;
 
 
@@ -34,8 +32,8 @@ return [
     App::class => function (ContainerInterface $container) {
         $app = AppFactory::createFromContainer($container);
 
-        // Access routes from the RouteCollection
-        $routes = $container->get(RouteCollection::class)->getRoutes();
+        // Register Routes
+        (require $container->get('route_discovery'))($app);
 
         // Register routes using Slim's methods
         foreach ($routes as $route) {
@@ -119,13 +117,20 @@ return [
         return new JsonRenderer();
     },
 
+    'route_discovery' => function () {
+        $locations = [
+            __DIR__ . '/../../../../routes.php',
+            __DIR__ . '/../../../../config/routes.php',
+            __DIR__ . '/../../../../app/routes.php',
+        ];
 
-    RouteCollection::class => function () {
-        return new RouteCollection();
-    },
+        foreach ($locations as $location) {
+            if (file_exists($location)) {
+                return $location;
+            }
+        }
 
-    RouteBuilder::class => function (ContainerInterface $container) {
-        return new RouteBuilder($container->get(RouteCollection::class));
+        throw new RuntimeException('No routes file found in any location.');
     },
 
 ];
