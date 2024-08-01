@@ -1,0 +1,38 @@
+{
+    "name": "mochiphp/mochi",
+    "description": "A MVC framework for slimphp",
+    "license": "MIT",
+    "type": "library",
+    "keywords": [
+        "framework",
+        "mvc",
+        "rapid-development",
+        "conventions over configuration",
+        "dry",
+        "psr-7",
+        "slim"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Mochi\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Scallyt"
+        }
+    ],
+    "require": {
+        "slim/psr7": "^1.7",
+        "php-di/php-di": "^7.0",
+        "slim/slim": "4.*",
+        "selective/basepath": "^2.2",
+        "monolog/monolog": "^3.7",
+        "scorninpc/slim-smarty-view": "2.*",
+        "odan/session": "6.1.0",
+        "symfony/console": "^7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.2"
+    }
+}
