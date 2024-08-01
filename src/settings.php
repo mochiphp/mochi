@@ -1,29 +1,27 @@
 <?php
 
-define('APP_ROOT', __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR);
+// Detect environment
+$_ENV['APP_ENV'] ??= $_SERVER['APP_ENV'] ?? 'dev';
 
-return [
-    'settings' => function () {
-        return [
-            'determineRouteBeforeAppMiddleware' => false,
-            'error' => [
-                'displayErrorDetails' => true,
-                'logErrors' => true,
-                'logErrorDetails' => true,
-            ],
-            'logger' => [
-                'path' => APP_ROOT . '/logs',
-                'level' => \Monolog\Level::Debug,
-            ],
-            'sessions' => [
-                'name' => 'app',
-                'lifetime' => 7200,
-                'path' => null,
-                'domain' => null,
-                'secure' => false,
-                'httponly' => true,
-                'cache_limiter' => 'nocache',
-            ]
-        ];
-    }
+// Load default settings
+$settings = require __DIR__ . '/defaults.php';
+
+// Overwrite default settings with environment specific local settings
+$configFiles = [
+    __DIR__ . sprintf('/local.%s.php', $_ENV['APP_ENV']),
+    __DIR__ . '/env.php',
+    __DIR__ . '/../../env.php',
 ];
+
+foreach ($configFiles as $configFile) {
+    if (!file_exists($configFile)) {
+        continue;
+    }
+
+    $local = require $configFile;
+    if (is_callable($local)) {
+        $settings = $local($settings);
+    }
+}
+
+return $settings;

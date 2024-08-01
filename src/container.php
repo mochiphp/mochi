@@ -81,7 +81,7 @@ return [
         $logger = new Logger('app');
 
         $filename = sprintf('%s/app.log', $settings['path']);
-        $level = $settings['level'] ?? Level::Debug; // Ensure a default level is set
+        $level = $settings['level'];
         $rotatingFileHandler = new RotatingFileHandler($filename, 0, $level, true, 0777);
         $rotatingFileHandler->setFormatter(new LineFormatter(null, null, false, true));
         $logger->pushHandler($rotatingFileHandler);
@@ -99,7 +99,6 @@ return [
             (bool)$settings['display_error_details'],
         );
     },
-
     Smarty::class => function () {
         $smarty = new Smarty();
         $smarty->setTemplateDir(__DIR__ . '/../../../../templates/');
