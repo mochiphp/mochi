@@ -3,8 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use Mochi\Validator\Validator;
 
-
-// TODO Need Refactoring
 class ValidatorTest extends TestCase
 {
     private $validator;
@@ -16,12 +14,11 @@ class ValidatorTest extends TestCase
 
     public function testValidateMin()
     {
-        $validator = new Validator();
         $data = ['username' => 'us'];
-        $rules = ['username' => ['min' => 3]];
+        $rules = ['username' => ['min' => [3, 'message' => 'The username must be at least 3 characters.']]];
 
-        $validator->validate($data, $rules);
-        $errors = $validator->getErrors();
+        $this->validator->validate($data, $rules);
+        $errors = $this->validator->getErrors();
 
         $this->assertArrayHasKey('username', $errors);
         $this->assertContains('The username must be at least 3 characters.', $errors['username']);
@@ -29,24 +26,22 @@ class ValidatorTest extends TestCase
 
     public function testValidateMinValid()
     {
-        $validator = new Validator();
         $data = ['username' => 'user'];
-        $rules = ['username' => ['min' => 3]];
+        $rules = ['username' => ['min' => [3, 'message' => 'The username must be at least 3 characters.']]];
 
-        $validator->validate($data, $rules);
-        $errors = $validator->getErrors();
+        $this->validator->validate($data, $rules);
+        $errors = $this->validator->getErrors();
 
         $this->assertArrayNotHasKey('username', $errors);
     }
 
     public function testValidateMax()
     {
-        $validator = new Validator();
         $data = ['username' => 'this_is_a_very_long_username'];
-        $rules = ['username' => ['max' => 10]];
+        $rules = ['username' => ['max' => [10, 'message' => 'The username must be no more than 10 characters.']]];
 
-        $validator->validate($data, $rules);
-        $errors = $validator->getErrors();
+        $this->validator->validate($data, $rules);
+        $errors = $this->validator->getErrors();
 
         $this->assertArrayHasKey('username', $errors);
         $this->assertContains('The username must be no more than 10 characters.', $errors['username']);
@@ -54,24 +49,22 @@ class ValidatorTest extends TestCase
 
     public function testValidateMaxValid()
     {
-        $validator = new Validator();
         $data = ['username' => 'user'];
-        $rules = ['username' => ['max' => 10]];
+        $rules = ['username' => ['max' => [10, 'message' => 'The username must be no more than 10 characters.']]];
 
-        $validator->validate($data, $rules);
-        $errors = $validator->getErrors();
+        $this->validator->validate($data, $rules);
+        $errors = $this->validator->getErrors();
 
         $this->assertArrayNotHasKey('username', $errors);
     }
 
     public function testValidateEmail()
     {
-        $validator = new Validator();
         $data = ['email' => 'invalid-email'];
-        $rules = ['email' => ['email' => true]];
+        $rules = ['email' => ['email' => [true, 'message' => 'The email must be a valid email address.']]];
 
-        $validator->validate($data, $rules);
-        $errors = $validator->getErrors();
+        $this->validator->validate($data, $rules);
+        $errors = $this->validator->getErrors();
 
         $this->assertArrayHasKey('email', $errors);
         $this->assertContains('The email must be a valid email address.', $errors['email']);
@@ -79,26 +72,24 @@ class ValidatorTest extends TestCase
 
     public function testValidateEmailValid()
     {
-        $validator = new Validator();
         $data = ['email' => 'valid@example.com'];
-        $rules = ['email' => ['email' => true]];
+        $rules = ['email' => ['email' => [true, 'message' => 'The email must be a valid email address.']]];
 
-        $validator->validate($data, $rules);
-        $errors = $validator->getErrors();
+        $this->validator->validate($data, $rules);
+        $errors = $this->validator->getErrors();
 
         $this->assertArrayNotHasKey('email', $errors);
     }
 
     public function testValidateInputWithJson()
     {
-        $validator = new Validator();
         $input = '{"email": "invalid-email", "username": "user"}';
         $rules = [
-            'email' => ['email' => true],
-            'username' => ['min' => 3, 'max' => 15]
+            'email' => ['email' => [true, 'message' => 'The email must be a valid email address.']],
+            'username' => ['min' => [3, 'message' => 'The username must be at least 3 characters.'], 'max' => [15, 'message' => 'The username must be no more than 15 characters.']]
         ];
 
-        $errors = $validator->validateInput($input, $rules);
+        $errors = $this->validator->validateInput($input, $rules);
 
         $this->assertArrayHasKey('email', $errors);
         $this->assertContains('The email must be a valid email address.', $errors['email']);
@@ -106,28 +97,26 @@ class ValidatorTest extends TestCase
 
     public function testValidateInputWithJsonValid()
     {
-        $validator = new Validator();
         $input = '{"email": "valid@example.com", "username": "user"}';
         $rules = [
-            'email' => ['email' => true],
-            'username' => ['min' => 3, 'max' => 15]
+            'email' => ['email' => [true, 'message' => 'The email must be a valid email address.']],
+            'username' => ['min' => [3, 'message' => 'The username must be at least 3 characters.'], 'max' => [15, 'message' => 'The username must be no more than 15 characters.']]
         ];
 
-        $errors = $validator->validateInput($input, $rules);
+        $errors = $this->validator->validateInput($input, $rules);
 
         $this->assertEmpty($errors);
     }
 
     public function testValidateInputWithForm()
     {
-        $validator = new Validator();
         $input = "email=invalid-email&username=user";
         $rules = [
-            'email' => ['email' => true],
-            'username' => ['min' => 3, 'max' => 15]
+            'email' => ['email' => [true, 'message' => 'The email must be a valid email address.']],
+            'username' => ['min' => [3, 'message' => 'The username must be at least 3 characters.'], 'max' => [15, 'message' => 'The username must be no more than 15 characters.']]
         ];
 
-        $errors = $validator->validateInput($input, $rules);
+        $errors = $this->validator->validateInput($input, $rules);
 
         $this->assertArrayHasKey('email', $errors);
         $this->assertContains('The email must be a valid email address.', $errors['email']);
@@ -135,29 +124,26 @@ class ValidatorTest extends TestCase
 
     public function testValidateInputWithFormValid()
     {
-        $validator = new Validator();
         $input = "email=valid@example.com&username=user";
         $rules = [
-            'email' => ['email' => true],
-            'username' => ['min' => 3, 'max' => 15]
+            'email' => ['email' => [true, 'message' => 'The email must be a valid email address.']],
+            'username' => ['min' => [3, 'message' => 'The username must be at least 3 characters.'], 'max' => [15, 'message' => 'The username must be no more than 15 characters.']]
         ];
 
-        $errors = $validator->validateInput($input, $rules);
+        $errors = $this->validator->validateInput($input, $rules);
 
         $this->assertEmpty($errors);
     }
 
     public function testValidateRequired()
     {
-        $validator = new Validator();
-
         $input = "email=invalid-email&username=";
         $rules = [
-            'email' => ['email' => true],
-            'username' => ['required' => true, 'min' => 3, 'max' => 15]
+            'email' => ['email' => [true, 'message' => 'The email must be a valid email address.']],
+            'username' => ['required' => [true, 'message' => 'The username must be filled.'], 'min' => [3, 'message' => 'The username must be at least 3 characters.'], 'max' => [15, 'message' => 'The username must be no more than 15 characters.']]
         ];
 
-        $errors = $validator->validateInput($input, $rules);
+        $errors = $this->validator->validateInput($input, $rules);
 
         $this->assertArrayHasKey('username', $errors);
         $this->assertContains('The username must be filled.', $errors['username']);
@@ -165,15 +151,13 @@ class ValidatorTest extends TestCase
 
     public function testValidateRequiredValid()
     {
-        $validator = new Validator();
-
         $input = "email=valid@example.com&username=user";
         $rules = [
-            'email' => ['email' => true],
-            'username' => ['required' => true, 'min' => 3, 'max' => 15]
+            'email' => ['email' => [true, 'message' => 'The email must be a valid email address.']],
+            'username' => ['required' => [true, 'message' => 'The username must be filled.'], 'min' => [3, 'message' => 'The username must be at least 3 characters.'], 'max' => [15, 'message' => 'The username must be no more than 15 characters.']]
         ];
 
-        $errors = $validator->validateInput($input, $rules);
+        $errors = $this->validator->validateInput($input, $rules);
 
         $this->assertEmpty($errors);
     }
@@ -186,8 +170,8 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'age' => [
-                'dataType' => 'integer',
-                'min' => 18,
+                'dataType' => ['integer', 'message' => 'The age must be of type integer.'],
+                'min' => [18, 'message' => 'The age must be at least 18.'],
             ],
         ];
 
@@ -205,7 +189,7 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'age' => [
-                'dataType' => 'integer',
+                'dataType' => ['integer'],
             ],
         ];
 
@@ -225,7 +209,7 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'price' => [
-                'dataType' => 'float',
+                'dataType' => ['float', 'message' => 'The price must be of type float.'],
             ],
         ];
 
@@ -243,7 +227,7 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'price' => [
-                'dataType' => 'float',
+                'dataType' => ['float', 'message' => 'The price must be of type float.'],
             ],
         ];
 
@@ -263,8 +247,8 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'name' => [
-                'dataType' => 'string',
-                'min' => 3,
+                'dataType' => ['string', 'message' => 'The name must be of type string.'],
+                'min' => [3, 'message' => 'The name must be at least 3 characters.'],
             ],
         ];
 
@@ -282,8 +266,8 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'name' => [
-                'dataType' => 'string',
-                'min' => 3,
+                'dataType' => ['string', 'message' => 'The name must be of type string.'],
+                'min' => [3, 'message' => 'The name must be at least 3 characters.'],
             ],
         ];
 
@@ -303,7 +287,7 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'isActive' => [
-                'dataType' => 'boolean',
+                'dataType' => ['boolean', 'message' => 'The isActive must be of type boolean.'],
             ],
         ];
 
@@ -321,7 +305,7 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'isActive' => [
-                'dataType' => 'boolean',
+                'dataType' => ['boolean', 'message' => 'The isActive must be of type boolean.'],
             ],
         ];
 
@@ -341,7 +325,7 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'profile' => [
-                'dataType' => 'null',
+                'dataType' => ['null', 'message' => 'The profile must be of type null.'],
             ],
         ];
 
@@ -359,7 +343,7 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'profile' => [
-                'dataType' => 'null',
+                'dataType' => ['null', 'message' => 'The profile must be of type null.'],
             ],
         ];
 
@@ -379,7 +363,7 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'event_date' => [
-                'date' => 'Y-m-d',
+                'date' => ['Y-m-d', 'message' => 'The event_date must be a valid date in the format Y-m-d.'],
             ],
         ];
 
@@ -398,7 +382,7 @@ class ValidatorTest extends TestCase
 
         $rules = [
             'event_date' => [
-                'date' => 'Y-m-d',
+                'date' => ['Y-m-d', 'message' => 'The event_date must be a valid date in the format Y-m-d.'],
             ],
         ];
 
@@ -409,5 +393,25 @@ class ValidatorTest extends TestCase
         $this->assertNotEmpty($errors);
         $this->assertArrayHasKey('event_date', $errors);
         $this->assertContains('The event_date must be a valid date in the format Y-m-d.', $errors['event_date']);
+    }
+
+    public function testValidateUrl()
+    {
+        $data = ['website' => 'invalid-url'];
+        $rules = ['website' => ['url' => [true, 'message' => 'The website must be a valid URL.']]];
+        $this->validator->validate($data, $rules);
+        $errors = $this->validator->getErrors();
+        $this->assertArrayHasKey('website', $errors);
+        $this->assertEquals('The website must be a valid URL.', $errors['website'][0]);
+    }
+
+    public function testValidateBetween()
+    {
+        $data = ['age' => 15];
+        $rules = ['age' => ['between' => ['18|25', 'message' => 'The age must be at least 18.']]];
+        $this->validator->validate($data, $rules);
+        $errors = $this->validator->getErrors();
+        $this->assertArrayHasKey('age', $errors);
+        $this->assertEquals('The age must be at least 18.', $errors['age'][0]);
     }
 }

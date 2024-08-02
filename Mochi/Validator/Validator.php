@@ -8,14 +8,17 @@ class Validator
 
     public function validate($data, $rules)
     {
-
         foreach ($rules as $field => $fieldRules) {
-            foreach ($fieldRules as $rule => $ruleValue) {
+            foreach ($fieldRules as $rule => $ruleDetails) {
                 $value = isset($data[$field]) ? $data[$field] : null;
                 $method = 'validate' . ucfirst($rule);
 
+                // Extract rule value and custom message
+                $ruleValue = is_array($ruleDetails) ? $ruleDetails[0] : $ruleDetails;
+                $customMessage = is_array($ruleDetails) && isset($ruleDetails['message']) ? $ruleDetails['message'] : (isset($ruleDetails[1]) ? $ruleDetails[1] : null);
+
                 if (method_exists($this, $method)) {
-                    $this->$method($field, $value, $ruleValue);
+                    $this->$method($field, $value, $ruleValue, $customMessage);
                 }
             }
         }
@@ -31,53 +34,46 @@ class Validator
         $this->errors[$field][] = $message;
     }
 
-    private function validateMin($field, $value, $min)
+    private function validateMin($field, $value, $min, $customMessage = null)
     {
-
-        if (is_numeric($value)) {
-            if (floatval($value) < floatval($min)) {
-                $this->addError($field, "The $field must be at least $min.");
-            }
+        if (is_numeric($value) && floatval($value) < floatval($min)) {
+            $this->addError($field, $customMessage ?? "The $field must be at least $min.");
         } elseif (is_string($value) && strlen($value) < $min) {
-            $this->addError($field, "The $field must be at least $min characters.");
+            $this->addError($field, $customMessage ?? "The $field must be at least $min characters.");
         }
     }
 
-    private function validateMax($field, $value, $max)
+    private function validateMax($field, $value, $max, $customMessage = null)
     {
-
-        if (is_numeric($value)) {
-            if (floatval($value) > floatval($max)) {
-                $this->addError($field, "The $field must be no more than $max.");
-            }
+        if (is_numeric($value) && floatval($value) > floatval($max)) {
+            $this->addError($field, $customMessage ?? "The $field must be no more than $max.");
         } elseif (is_string($value) && strlen($value) > $max) {
-            $this->addError($field, "The $field must be no more than $max characters.");
+            $this->addError($field, $customMessage ?? "The $field must be no more than $max characters.");
         }
     }
 
-    private function validateEmail($field, $value)
+    private function validateEmail($field, $value, $ruleValue, $customMessage = null)
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            $this->addError($field, "The $field must be a valid email address.");
+            $this->addError($field, $customMessage ?? "The $field must be a valid email address.");
         }
     }
 
-    // TODO: Write TEST
-    private function validateUrl($field, $value)
+    private function validateUrl($field, $value, $ruleValue, $customMessage = null)
     {
         if (!filter_var($value, FILTER_VALIDATE_URL)) {
-            $this->addError($field, "The $field must be a valid email address.");
+            $this->addError($field, $customMessage ?? "The $field must be a valid URL.");
         }
     }
 
-    private function validateRequired($field, $value)
+    private function validateRequired($field, $value, $ruleValue, $customMessage = null)
     {
         if (empty($value)) {
-            $this->addError($field, "The $field must be filled.");
+            $this->addError($field, $customMessage ?? "The $field must be filled.");
         }
     }
 
-    private function validateDataType($field, $value, $dataType)
+    private function validateDataType($field, $value, $dataType, $customMessage = null)
     {
         $types = [
             'integer'   => 'is_int',
@@ -96,32 +92,32 @@ class Validator
         $typeCheckFunction = $types[$dataType];
 
         if (!$typeCheckFunction($value)) {
-            $this->addError($field, "The $field must be of type $dataType.");
+            $this->addError($field, $customMessage ?? "The $field must be of type $dataType.");
         }
     }
 
-    private function validateDate($field, $value, $format = 'Y-m-d')
+    private function validateDate($field, $value, $format = 'Y-m-d', $customMessage = null)
     {
         $date = \DateTime::createFromFormat($format, $value);
         if ($date === false || $date->format($format) !== $value) {
-            $this->addError($field, "The $field must be a valid date in the format $format.");
+            $this->addError($field, $customMessage ?? "The $field must be a valid date in the format $format.");
         }
     }
 
-    // TODO: Unit Testing
-    private function validateBetween($field, $value, $beetween)
+    private function validateBetween($field, $value, $between, $customMessage = null)
     {
-        list($min, $max) = explode("|", $beetween);
+        list($min, $max) = explode("|", $between);
         if (is_numeric($min) && is_numeric($max)) {
-            if (floatval($value) > floatval($min)) $this->addError($field, "The $field must be at least $min.");
-            if (floatval($value) < floatval($max)) $this->addError($field, "The $field must be no more than $max.");
-        } elseif (is_string($value) && strlen($value) > $max) {
-            $this->addError($field, "The $field must be no more than $max characters.");
-        } elseif (is_string($value) && strlen($value) > $max) {
-            $this->addError($field, "The $field must be no more than $max characters.");
+            if (floatval($value) < floatval($min)) {
+                $this->addError($field, $customMessage ?? "The $field must be at least $min.");
+            }
+            if (floatval($value) > floatval($max)) {
+                $this->addError($field, $customMessage ?? "The $field must be no more than $max.");
+            }
+        } elseif (is_string($value) && (strlen($value) < $min || strlen($value) > $max)) {
+            $this->addError($field, $customMessage ?? "The $field must be between $min and $max characters.");
         }
     }
-
 
     public function validateInput($input, $rules)
     {
