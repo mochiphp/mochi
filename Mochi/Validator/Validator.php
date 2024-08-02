@@ -9,13 +9,18 @@ class Validator
     public function validate($data, $rules)
     {
         foreach ($rules as $field => $fieldRules) {
-            foreach ($fieldRules as $rule => $ruleDetails) {
+            // Külön kezeljük a .messages kulcsokat
+            if (strpos($field, '.messages') !== false) {
+                continue;
+            }
+
+            foreach ($fieldRules as $rule => $ruleValue) {
                 $value = isset($data[$field]) ? $data[$field] : null;
                 $method = 'validate' . ucfirst($rule);
 
-                // Extract rule value and custom message
-                $ruleValue = is_array($ruleDetails) ? $ruleDetails[0] : $ruleDetails;
-                $customMessage = is_array($ruleDetails) && isset($ruleDetails['message']) ? $ruleDetails['message'] : (isset($ruleDetails[1]) ? $ruleDetails[1] : null);
+                // Hibaüzenet kikeresése a .messages alól
+                $customMessages = isset($rules[$field . '.messages']) ? $rules[$field . '.messages'] : [];
+                $customMessage = isset($customMessages[$rule]) ? $customMessages[$rule] : null;
 
                 if (method_exists($this, $method)) {
                     $this->$method($field, $value, $ruleValue, $customMessage);
@@ -107,17 +112,29 @@ class Validator
     private function validateBetween($field, $value, $between, $customMessage = null)
     {
         list($min, $max) = explode("|", $between);
-        if (is_numeric($min) && is_numeric($max)) {
-            if (floatval($value) < floatval($min)) {
+
+        $min = (int)$min;
+        $max = (int)$max;
+
+        if (is_numeric($value)) {
+            $value = (int)$value;
+            if ($value < $min) {
                 $this->addError($field, $customMessage ?? "The $field must be at least $min.");
             }
-            if (floatval($value) > floatval($max)) {
+            if ($value > $max) {
                 $this->addError($field, $customMessage ?? "The $field must be no more than $max.");
             }
-        } elseif (is_string($value) && (strlen($value) < $min || strlen($value) > $max)) {
-            $this->addError($field, $customMessage ?? "The $field must be between $min and $max characters.");
+        } elseif (is_string($value)) {
+            $length = strlen($value);
+            if ($length < $min) {
+                $this->addError($field, $customMessage ?? "The $field must be at least $min characters.");
+            }
+            if ($length > $max) {
+                $this->addError($field, $customMessage ?? "The $field must be no more than $max characters.");
+            }
         }
     }
+
 
     public function validateInput($input, $rules)
     {
