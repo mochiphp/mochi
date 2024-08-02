@@ -26,6 +26,16 @@ return [
     // Application settings
     'settings' => fn () => require __DIR__ . '/settings.php',
 
+    'db' => function ($container) {
+        $capsule = new \Illuminate\Database\Capsule\Manager;
+        $capsule->addConnection($container->get('settings')['db']);
+
+        $capsule->setAsGlobal();
+        $capsule->bootEloquent();
+
+        return $capsule;
+    },
+
     App::class => function (ContainerInterface $container) {
         $app = AppFactory::createFromContainer($container);
 
