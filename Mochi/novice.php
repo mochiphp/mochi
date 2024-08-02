@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '../vendor/autoload.php';
 
 define("MIGRATIONS_PATH", __DIR__ . "/../../../../src/Resaurce/migrations");
 define("SEEDS_PATH", __DIR__ . "/../../../../src/Resaurce/seeds");
