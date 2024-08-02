@@ -6,6 +6,7 @@ use Mochi\Renderer\JsonRenderer;
 use DomainException;
 use Fig\Http\Message\StatusCodeInterface;
 use InvalidArgumentException;
+use Mochi\Renderer\Renderer;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -18,18 +19,18 @@ use Throwable;
 final class ExceptionMiddleware implements MiddlewareInterface
 {
     private ResponseFactoryInterface $responseFactory;
-    private JsonRenderer $renderer;
+    private Renderer $renderer;
     private ?LoggerInterface $logger;
     private bool $displayErrorDetails;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
-        JsonRenderer $jsonRenderer,
+        Renderer $renderer,
         LoggerInterface $logger = null,
         bool $displayErrorDetails = false,
     ) {
         $this->responseFactory = $responseFactory;
-        $this->renderer = $jsonRenderer;
+        $this->renderer = $renderer;
         $this->displayErrorDetails = $displayErrorDetails;
         $this->logger = $logger;
     }

@@ -4,7 +4,6 @@ use Mochi\Middleware\ExceptionMiddleware;
 use Mochi\Renderer\Renderer;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
-use Monolog\Level;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -22,7 +21,6 @@ use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Factory\UploadedFileFactory;
 use Slim\Psr7\Factory\UriFactory;
-use Smarty;
 
 return [
     // Application settings
@@ -97,9 +95,8 @@ return [
     Smarty::class => function () {
         $smarty = new Smarty();
         $smarty->setTemplateDir(__DIR__ . '/../../../../templates/');
-        $smarty->setCompileDir(__DIR__ . '/../../../../templates_c/');
-        $smarty->setCacheDir(__DIR__ . '/../../../../cache/');
-        $smarty->setConfigDir(__DIR__ . '/../../../../config/');
+        $smarty->setCompileDir(__DIR__ . '/../../../../var/');
+        $smarty->setCacheDir(__DIR__ . '/../../../../var/cache');
         return $smarty;
     },
 
