@@ -1,8 +1,7 @@
 <?php
 
 use Mochi\Middleware\ExceptionMiddleware;
-use Mochi\Renderer\JsonRenderer;
-use Mochi\Renderer\SmartyRenderer;
+use Mochi\Renderer\Renderer;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Level;
@@ -23,7 +22,7 @@ use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Factory\UploadedFileFactory;
 use Slim\Psr7\Factory\UriFactory;
-
+use Smarty;
 
 return [
     // Application settings
@@ -34,11 +33,6 @@ return [
 
         // Register Routes
         (require $container->get('route_discovery'))($app);
-
-        // Register routes using Slim's methods
-        foreach ($routes as $route) {
-            $app->{$route['method']}($route['path'], $route['handler']);
-        }
 
         // Register middleware
         (require __DIR__ . '/middleware.php')($app);
@@ -94,11 +88,12 @@ return [
 
         return new ExceptionMiddleware(
             $container->get(ResponseFactoryInterface::class),
-            $container->get(JsonRenderer::class),
+            $container->get(Renderer::class),
             $container->get(LoggerInterface::class),
             (bool)$settings['display_error_details'],
         );
     },
+
     Smarty::class => function () {
         $smarty = new Smarty();
         $smarty->setTemplateDir(__DIR__ . '/../../../../templates/');
@@ -108,12 +103,8 @@ return [
         return $smarty;
     },
 
-    SmartyRenderer::class => function (ContainerInterface $container) {
-        return new SmartyRenderer($container->get(Smarty::class));
-    },
-
-    JsonRenderer::class => function () {
-        return new JsonRenderer();
+    Renderer::class => function (ContainerInterface $container) {
+        return new Renderer($container->get(Smarty::class));
     },
 
     'route_discovery' => function () {
@@ -131,5 +122,4 @@ return [
 
         throw new RuntimeException('No routes file found in any location.');
     },
-
 ];

@@ -5,7 +5,7 @@ namespace Mochi\Renderer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Smarty;
 
-final class SmartyRenderer
+final class Renderer
 {
     private Smarty $smarty;
 
@@ -14,7 +14,16 @@ final class SmartyRenderer
         $this->smarty = $smarty;
     }
 
-    public function render(Response $response, string $template, ?array $data = []): Response
+    public function json(Response $response, $data): Response
+    {
+        $payload = json_encode($data);
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus(200);
+    }
+
+    public function smarty(Response $response, string $template, ?array $data = []): Response
     {
         $this->smarty->assign($data);
         $body = $response->getBody();
