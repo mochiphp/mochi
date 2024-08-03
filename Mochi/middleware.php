@@ -10,4 +10,9 @@ return function (App $app) {
     $app->addRoutingMiddleware();
     $app->add(BasePathMiddleware::class);
     $app->add(ExceptionMiddleware::class);
+    $app->add(new Zeuxisoo\Whoops\Slim\WhoopsMiddleware([
+        'enable' => true,
+        'editor' => 'vscode',
+        'title'  => 'Test',
+    ]));
 };
