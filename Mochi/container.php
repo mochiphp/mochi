@@ -21,20 +21,11 @@ use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Factory\UploadedFileFactory;
 use Slim\Psr7\Factory\UriFactory;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 return [
     // Application settings
     'settings' => fn () => require __DIR__ . '/settings.php',
-
-    'db' => function ($container) {
-        $capsule = new \Illuminate\Database\Capsule\Manager;
-        $capsule->addConnection($container->get('settings')['db']);
-
-        $capsule->setAsGlobal();
-        $capsule->bootEloquent();
-
-        return $capsule;
-    },
 
     App::class => function (ContainerInterface $container) {
         $app = AppFactory::createFromContainer($container);
@@ -112,6 +103,17 @@ return [
 
     Renderer::class => function (ContainerInterface $container) {
         return new Renderer($container->get(Smarty::class));
+    },
+
+    Capsule::class => function (ContainerInterface $container) {
+        $settings = $container->get('settings')['db'];
+
+        $capsule = new Capsule;
+        $capsule->addConnection($settings);
+        $capsule->setAsGlobal();
+        $capsule->bootEloquent();
+
+        return $capsule;
     },
 
     'route_discovery' => function () {

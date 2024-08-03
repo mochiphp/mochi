@@ -1,6 +1,7 @@
 <?php
 
 // Application default settings
+define('APP_ROOT', __DIR__);
 
 // Error reporting
 error_reporting(0);
@@ -36,5 +37,6 @@ $settings['db'] = [
     'collation' => 'utf8_unicode_ci',
     'prefix'    => '',
 ];
+
 
 return $settings;
