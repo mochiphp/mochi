@@ -85,7 +85,10 @@ final class ExceptionMiddleware implements MiddlewareInterface
             ],
         ];
 
-        return $this->renderer->json($response, $data);
+        //! Ez nagy valószínüleg error-t dob
+        $statusCode = null;
+
+        return $this->renderer->json($response, $statusCode, $data);
     }
 
     public function renderHtml(ResponseInterface $response, Throwable $exception): ResponseInterface

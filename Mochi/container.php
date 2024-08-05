@@ -22,6 +22,9 @@ use Slim\Psr7\Factory\StreamFactory;
 use Slim\Psr7\Factory\UploadedFileFactory;
 use Slim\Psr7\Factory\UriFactory;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Odan\Session\PhpSession;
+use Odan\Session\SessionInterface;
+use Odan\Session\SessionManagerInterface;
 
 return [
     // Application settings
@@ -114,6 +117,16 @@ return [
         $capsule->bootEloquent();
 
         return $capsule;
+    },
+
+    SessionManagerInterface::class => function (ContainerInterface $container) {
+        return $container->get(SessionInterface::class);
+    },
+
+    SessionInterface::class => function (ContainerInterface $container) {
+        $options = $container->get('settings')['session'];
+
+        return new PhpSession($options);
     },
 
     'route_discovery' => function () {

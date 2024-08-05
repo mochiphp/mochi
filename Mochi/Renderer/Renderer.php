@@ -14,13 +14,13 @@ final class Renderer
         $this->smarty = $smarty;
     }
 
-    public function json(Response $response, $data): Response
+    public function json(Response $response, ?int $statusCode = 200, $data): Response
     {
         $payload = json_encode($data);
         $response->getBody()->write($payload);
         return $response
             ->withHeader('Content-Type', 'application/json')
-            ->withStatus(200);
+            ->withStatus($statusCode ?? 200);
     }
 
     public function smarty(Response $response, string $template, ?array $data = []): Response

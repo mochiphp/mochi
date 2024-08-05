@@ -38,5 +38,14 @@ $settings['db'] = [
     'prefix'    => '',
 ];
 
+$settings['session'] = [
+    'name' => 'app',
+    'lifetime' => 7200,
+    'path' => null,
+    'domain' => null,
+    'secure' => false,
+    'httponly' => true,
+    'cache_limiter' => 'nocache',
+];
 
 return $settings;
